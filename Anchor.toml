@@ -1,0 +1,19 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+default = "ALQ2XfbNPuqnW33e9f83CKNVf93egaJN9fxsE9RoPQho"
+simple_transfer = "CGUBBtJSaJXcrieV9x7KYGTsdJJuRb819NxbKzCo7EFM"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test"
+
+[hooks]
