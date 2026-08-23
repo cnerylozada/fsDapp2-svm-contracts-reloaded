@@ -1,13 +1,9 @@
-pub mod constants;
-pub mod error;
-pub mod instructions;
-pub mod state;
-
 use anchor_lang::prelude::*;
 
-pub use constants::*;
-pub use instructions::*;
-pub use state::*;
+mod constants;
+mod instructions;
+mod models;
+use instructions::*;
 
 declare_id!("CGUBBtJSaJXcrieV9x7KYGTsdJJuRb819NxbKzCo7EFM");
 
@@ -15,7 +11,11 @@ declare_id!("CGUBBtJSaJXcrieV9x7KYGTsdJJuRb819NxbKzCo7EFM");
 pub mod simple_transfer {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn create_account(_ctx: Context<CreateAccount>, _goal: String) -> Result<()> {
+        create_account::handler(_ctx, _goal)
+    }
+
+    pub fn deposit(_ctx: Context<Deposit>, _goal: String, _amount: u64) -> Result<()> {
+        deposit::handler(_ctx, _goal, _amount)
     }
 }

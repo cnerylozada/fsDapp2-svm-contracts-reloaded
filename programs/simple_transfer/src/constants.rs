@@ -1,4 +1,3 @@
-use anchor_lang::prelude::*;
+pub const ACCOUNT_DISCRIMINATOR: usize = 8;
 
-#[constant]
-pub const SEED: &str = "anchor";
+pub const VAUL_TAG: &[u8; 5] = b"vault";
