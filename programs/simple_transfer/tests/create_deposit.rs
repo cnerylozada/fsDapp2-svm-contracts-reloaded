@@ -1,68 +1,40 @@
-use anchor_lang::{system_program, InstructionData};
-use litesvm::LiteSVM;
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    pubkey::Pubkey,
-    signature::{Keypair, Signer},
-};
-use solana_transaction::Transaction;
+use borsh::BorshDeserialize;
+use solana_sdk::signer::Signer;
 
-use simple_transfer;
+mod utils;
+use utils::{
+    create_deposit_tx, get_create_deposit_pdas, setup_svm, CreateDepositInput, DepositAccount,
+};
 
 #[test]
 fn create_deposit() {
-    // Initialize the test environment
-    let mut svm = LiteSVM::new();
-    // Deploy your program to the test environment
-    let program_id = Pubkey::from(simple_transfer::ID);
-    let program_bytes = include_bytes!("../../../target/deploy/simple_transfer.so");
-    svm.add_program(program_id, program_bytes);
-    // Create and fund test accounts
-    let signer = Keypair::new();
-    svm.airdrop(&signer.pubkey(), 10_000_000_000).unwrap();
+    let (mut svm, signer) = setup_svm();
 
-    let goal = "a certain goal".to_string();
-
-    let (deposit_account_pda, _) = Pubkey::find_program_address(
-        &[
-            b"deposit_account",
-            signer.pubkey().as_ref(),
-            goal.as_bytes(),
-        ],
-        &simple_transfer::ID,
-    );
-
-    let (vault_account_pda, _) = Pubkey::find_program_address(
-        &[b"vault", deposit_account_pda.as_ref()],
-        &simple_transfer::ID,
-    );
-
-    let create_deposit_ix = Instruction {
-        program_id: simple_transfer::ID,
-        accounts: vec![
-            AccountMeta::new(deposit_account_pda, false),
-            AccountMeta::new(vault_account_pda, false),
-            AccountMeta::new(signer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
-        data: simple_transfer::instruction::CreateDeposit {
-            _amount: 1_000_000_000,
-            _goal: goal,
-        }
-        .data(),
+    let inputs = CreateDepositInput {
+        amount: 1_000_000_000,
+        goal: "a certain goal".to_string(),
     };
 
-    let create_deposit_tx = Transaction::new_signed_with_payer(
-        &[create_deposit_ix],
-        Some(&signer.pubkey()),
-        &[&signer],
-        svm.latest_blockhash(),
-    );
+    let (deposit_account_pda, vault_account_pda) =
+        get_create_deposit_pdas(signer.pubkey(), &inputs.goal);
 
-    // Send transaction
-    let create_deposit_tx_result = svm.send_transaction(create_deposit_tx);
+    let create_deposit_tx_result = create_deposit_tx(
+        &mut svm,
+        &signer,
+        deposit_account_pda,
+        vault_account_pda,
+        &inputs,
+    );
     assert_eq!(create_deposit_tx_result.is_ok(), true);
 
+    let deposit_account_raw = svm.get_account(&deposit_account_pda).unwrap();
+    assert_eq!(deposit_account_raw.owner, simple_transfer::ID);
+
+    let deposit_account = DepositAccount::deserialize(&mut &deposit_account_raw.data[8..]).unwrap();
+    assert_eq!(deposit_account.owner, signer.pubkey());
+    assert_eq!(deposit_account.amount, inputs.amount);
+    assert_eq!(deposit_account.goal, inputs.goal);
+
     let vault_account_balance = svm.get_balance(&vault_account_pda).unwrap();
-    assert_eq!(vault_account_balance, 1_000_000_000);
+    assert_eq!(vault_account_balance, inputs.amount);
 }

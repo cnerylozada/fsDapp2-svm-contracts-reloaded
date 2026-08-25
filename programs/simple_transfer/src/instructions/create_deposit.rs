@@ -1,11 +1,11 @@
-use crate::constants::{ACCOUNT_DISCRIMINATOR, VAUL_TAG};
+use crate::constants::{ACCOUNT_DISCRIMINATOR, VAULT_TAG};
 use crate::models::DepositAccount;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 
 #[derive(Accounts)]
 #[instruction(_goal: String)]
-pub struct CreateAccount<'info> {
+pub struct CreateDeposit<'info> {
     #[account(
         init,
         space = ACCOUNT_DISCRIMINATOR + DepositAccount::INIT_SPACE,
@@ -17,7 +17,7 @@ pub struct CreateAccount<'info> {
 
     #[account(
         mut,
-        seeds = [VAUL_TAG, deposit_account.key().as_ref()],
+        seeds = [VAULT_TAG, deposit_account.key().as_ref()],
         bump
     )]
     vault_account: SystemAccount<'info>,
@@ -28,7 +28,7 @@ pub struct CreateAccount<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn handler(_ctx: Context<CreateAccount>, _goal: String, _amount: u64) -> Result<()> {
+pub fn handler(_ctx: Context<CreateDeposit>, _goal: String, _amount: u64) -> Result<()> {
     *_ctx.accounts.deposit_account = DepositAccount {
         owner: _ctx.accounts.signer.key(),
         amount: _amount,
