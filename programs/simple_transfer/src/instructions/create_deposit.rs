@@ -1,6 +1,7 @@
-use crate::constants::ACCOUNT_DISCRIMINATOR;
+use crate::constants::{ACCOUNT_DISCRIMINATOR, VAUL_TAG};
 use crate::models::DepositAccount;
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 
 #[derive(Accounts)]
 #[instruction(_goal: String)]
@@ -14,19 +15,34 @@ pub struct CreateAccount<'info> {
     )]
     deposit_account: Account<'info, DepositAccount>,
 
+    #[account(
+        mut,
+        seeds = [VAUL_TAG, deposit_account.key().as_ref()],
+        bump
+    )]
+    vault_account: SystemAccount<'info>,
+
     #[account(mut)]
     signer: Signer<'info>,
 
     system_program: Program<'info, System>,
 }
 
-pub fn handler(_ctx: Context<CreateAccount>, _goal: String) -> Result<()> {
+pub fn handler(_ctx: Context<CreateAccount>, _goal: String, _amount: u64) -> Result<()> {
     *_ctx.accounts.deposit_account = DepositAccount {
         owner: _ctx.accounts.signer.key(),
-        amount: 0,
+        amount: _amount,
         goal: _goal,
         bump: _ctx.bumps.deposit_account,
     };
+
+    let cpi_accounts = Transfer {
+        from: _ctx.accounts.signer.to_account_info(),
+        to: _ctx.accounts.vault_account.to_account_info(),
+    };
+    let cpi_context = CpiContext::new(system_program::ID, cpi_accounts);
+
+    transfer(cpi_context, _amount)?;
 
     Ok(())
 }

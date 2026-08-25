@@ -1,5 +1,3 @@
-pub mod create_account;
-pub mod deposit;
+pub mod create_deposit;
 
-pub use create_account::*;
-pub use deposit::*;
+pub use create_deposit::*;
