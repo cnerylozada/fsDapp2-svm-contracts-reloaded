@@ -14,5 +14,7 @@ pub struct DepositAccount {
 }
 
 impl DepositAccount {
+    pub const MIN_VAULT_DEPOSIT: u64 = 500_000_000;
+    pub const MAX_GOAL_LEN: usize = 15;
     pub const DEPOSIT_ACCOUNT_TAG: &[u8; 15] = b"deposit_account";
 }
