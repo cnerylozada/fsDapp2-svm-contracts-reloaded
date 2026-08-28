@@ -1,4 +1,5 @@
 use crate::constants::VAULT_TAG;
+use crate::errors::SimpleTransferError;
 use crate::models::DepositAccount;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
@@ -27,6 +28,17 @@ pub struct Withdraw<'info> {
 }
 
 pub fn handler(_ctx: Context<Withdraw>, _goal: String, _amount: u64) -> Result<()> {
+    let final_vault_balance = _ctx
+        .accounts
+        .vault_account
+        .lamports()
+        .checked_sub(_amount)
+        .ok_or(SimpleTransferError::InsufficientDeposit)?;
+
+    if final_vault_balance < DepositAccount::MIN_VAULT_DEPOSIT {
+        return Err(SimpleTransferError::VaultBelowMinimumBalance.into());
+    }
+
     let cpi_accounts = Transfer {
         from: _ctx.accounts.vault_account.to_account_info(),
         to: _ctx.accounts.signer.to_account_info(),
@@ -39,6 +51,9 @@ pub fn handler(_ctx: Context<Withdraw>, _goal: String, _amount: u64) -> Result<(
     let cpi_context = CpiContext::new(system_program::ID, cpi_accounts).with_signer(signer_seeds);
 
     transfer(cpi_context, _amount)?;
+
+    let deposit_account = &mut _ctx.accounts.deposit_account;
+    deposit_account.amount = final_vault_balance;
 
     Ok(())
 }
