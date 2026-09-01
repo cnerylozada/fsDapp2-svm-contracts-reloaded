@@ -8,6 +8,7 @@ skip-lint = false
 [programs.localnet]
 default = "ALQ2XfbNPuqnW33e9f83CKNVf93egaJN9fxsE9RoPQho"
 simple_transfer = "CGUBBtJSaJXcrieV9x7KYGTsdJJuRb819NxbKzCo7EFM"
+token101 = "8qcRPrAkfUy9RtTUktUkjZufkmZmSMiWem9HQSgYpwEn"
 
 [provider]
 cluster = "localnet"
