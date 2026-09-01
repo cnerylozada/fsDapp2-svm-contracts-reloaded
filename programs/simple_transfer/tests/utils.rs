@@ -1,4 +1,4 @@
-use anchor_lang::{system_program, InstructionData, Key};
+use anchor_lang::{system_program, InstructionData};
 use borsh::BorshDeserialize;
 use litesvm::{types::TransactionResult, LiteSVM};
 use solana_sdk::{
