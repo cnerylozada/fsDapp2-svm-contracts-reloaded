@@ -57,13 +57,19 @@ pub fn create_funded_ata(
     token_account
 }
 
+pub fn get_recipient_authority_pda(main_user: Pubkey) -> Pubkey {
+    let (recipient_authority_pda, _) =
+        Pubkey::find_program_address(&[b"recipient_vault_tag", main_user.as_ref()], &token101::ID);
+    recipient_authority_pda
+}
+
 pub fn create_deposit_tx(
     svm: &mut LiteSVM,
     main_user: &Keypair,
     mint_account: Pubkey,
     sender_ata: Pubkey,
-    recipient_authority: Pubkey,
-    recipient_ata: Pubkey,
+    vault_authority: Pubkey,
+    vault_ata: Pubkey,
     amount: u64,
 ) -> Transaction {
     let create_deposit_ix = Instruction {
@@ -72,8 +78,8 @@ pub fn create_deposit_tx(
             AccountMeta::new(main_user.pubkey(), true),
             AccountMeta::new(mint_account, false),
             AccountMeta::new(sender_ata, false),
-            AccountMeta::new(recipient_authority, false),
-            AccountMeta::new(recipient_ata, false),
+            AccountMeta::new(vault_authority, false),
+            AccountMeta::new(vault_ata, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::id(), false),
             AccountMeta::new_readonly(TOKEN_ID, false),
