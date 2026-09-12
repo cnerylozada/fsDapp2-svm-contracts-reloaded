@@ -25,6 +25,10 @@ pub fn setup_svm() -> (LiteSVM, Keypair, Keypair) {
     (svm, minter_user, main_user)
 }
 
+pub fn to_base_units(amount: u64) -> u64 {
+    amount * 10u64.pow(DECIMALS as u32)
+}
+
 pub fn create_mint_account(svm: &mut LiteSVM, mint_authority: &Keypair) -> Pubkey {
     CreateMint::new(svm, &mint_authority)
         .authority(&mint_authority.pubkey())
@@ -33,7 +37,7 @@ pub fn create_mint_account(svm: &mut LiteSVM, mint_authority: &Keypair) -> Pubke
         .unwrap()
 }
 
-pub fn mint_to(
+pub fn create_funded_ata(
     svm: &mut LiteSVM,
     mint_authority: &Keypair,
     mint_account: Pubkey,
@@ -57,19 +61,24 @@ pub fn create_deposit_tx(
     svm: &mut LiteSVM,
     main_user: &Keypair,
     mint_account: Pubkey,
-    ata_vault: Pubkey,
+    sender_ata: Pubkey,
+    recipient_authority: Pubkey,
+    recipient_ata: Pubkey,
+    amount: u64,
 ) -> Transaction {
     let create_deposit_ix = Instruction {
         program_id: token101::ID,
         accounts: vec![
             AccountMeta::new(main_user.pubkey(), true),
             AccountMeta::new(mint_account, false),
-            AccountMeta::new(ata_vault, false),
+            AccountMeta::new(sender_ata, false),
+            AccountMeta::new(recipient_authority, false),
+            AccountMeta::new(recipient_ata, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::id(), false),
             AccountMeta::new_readonly(TOKEN_ID, false),
         ],
-        data: token101::instruction::CreateDeposit { _amount: 120 }.data(),
+        data: token101::instruction::CreateDeposit { _amount: amount }.data(),
     };
 
     Transaction::new_signed_with_payer(

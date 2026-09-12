@@ -29,15 +29,14 @@ fn create_deposit() {
     assert_eq!(create_deposit_tx_result.is_ok(), true);
 
     let deposit_account_raw = svm.get_account(&deposit_account_pda).unwrap();
-    let vault_account_raw = svm.get_account(&vault_account_pda).unwrap();
     assert_eq!(deposit_account_raw.owner, simple_transfer::ID);
-    assert_eq!(vault_account_raw.owner, system_program::ID);
 
     let deposit_account = DepositAccount::deserialize(&mut &deposit_account_raw.data[8..]).unwrap();
     assert_eq!(deposit_account.owner, signer.pubkey());
     assert_eq!(deposit_account.amount, inputs.amount);
     assert_eq!(deposit_account.goal, inputs.goal);
 
-    let vault_account_balance = svm.get_balance(&vault_account_pda).unwrap();
-    assert_eq!(vault_account_balance, inputs.amount);
+    let vault_account_raw = svm.get_account(&vault_account_pda).unwrap();
+    assert_eq!(vault_account_raw.owner, system_program::ID);
+    assert_eq!(vault_account_raw.lamports, inputs.amount);
 }
