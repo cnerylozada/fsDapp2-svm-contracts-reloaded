@@ -4,8 +4,8 @@ use spl_associated_token_account::get_associated_token_address;
 
 mod utils;
 use utils::{
-    create_deposit_tx, create_funded_ata, create_mint_account, get_recipient_authority_pda,
-    setup_svm, to_base_units,
+    create_deposit_tx, create_funded_ata, create_mint_account, get_vault_authority_pda, setup_svm,
+    to_base_units,
 };
 
 const INITIAL_BALANCE_UI: u64 = 10;
@@ -31,7 +31,7 @@ fn create_deposit() {
     assert_eq!(main_user_initial_ata_account.owner, main_user.pubkey());
     assert_eq!(main_user_initial_ata_account.amount, amount_to_mint);
 
-    let vault_authority_pda = get_recipient_authority_pda(main_user.pubkey());
+    let vault_authority_pda = get_vault_authority_pda(main_user.pubkey());
     let vault_ata = get_associated_token_address(&vault_authority_pda, &mint_account);
 
     let create_deposit_tx = create_deposit_tx(

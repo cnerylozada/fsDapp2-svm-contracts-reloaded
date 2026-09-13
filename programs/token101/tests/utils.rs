@@ -57,10 +57,10 @@ pub fn create_funded_ata(
     token_account
 }
 
-pub fn get_recipient_authority_pda(main_user: Pubkey) -> Pubkey {
-    let (recipient_authority_pda, _) =
+pub fn get_vault_authority_pda(main_user: Pubkey) -> Pubkey {
+    let (vault_authority_pda, _) =
         Pubkey::find_program_address(&[b"recipient_vault_tag", main_user.as_ref()], &token101::ID);
-    recipient_authority_pda
+    vault_authority_pda
 }
 
 pub fn create_deposit_tx(
