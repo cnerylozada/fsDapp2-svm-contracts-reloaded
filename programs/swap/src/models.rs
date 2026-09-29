@@ -3,8 +3,7 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(InitSpace)]
 pub struct Offer {
-    #[max_len(36)]
-    pub id: String,
+    pub id: [u8; 16],
     pub user: Pubkey,
     pub deposited_mint: Pubkey,
     pub deposited_amount: u64,

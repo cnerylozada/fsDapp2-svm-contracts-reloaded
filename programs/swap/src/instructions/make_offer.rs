@@ -8,7 +8,7 @@ use crate::constants::{VAULT_OFFER_TAG,ACCOUNT_DISCRIMINATOR};
 
 
 #[derive(Accounts)]
-#[instruction(_id: String)]
+#[instruction(_id: [u8; 16])]
 pub struct MakeOffer<'info> {
     #[account(mut)]
     signer: Signer<'info>,
@@ -17,7 +17,7 @@ pub struct MakeOffer<'info> {
         init,
         payer = signer,
         space = ACCOUNT_DISCRIMINATOR + Offer::INIT_SPACE,
-        seeds = [Offer::OFFER_TAG, _id.as_bytes(), signer.key().as_ref()],
+        seeds = [Offer::OFFER_TAG, _id.as_ref(), signer.key().as_ref()],
         bump
     )]
     offer: Account<'info, Offer>,
@@ -34,7 +34,7 @@ pub struct MakeOffer<'info> {
 
     #[account(
         mut,
-        seeds = [VAULT_OFFER_TAG, _id.as_bytes() ,signer.key().as_ref()],
+        seeds = [VAULT_OFFER_TAG, _id.as_ref(), signer.key().as_ref()],
         bump
     )]
     vault_offer_ata_authority: SystemAccount<'info>,
@@ -55,7 +55,7 @@ pub struct MakeOffer<'info> {
     token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<MakeOffer>, _id: String, _deposited_amount: u64, _wanted_amount: u64) -> Result<()> {
+pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _deposited_amount: u64, _wanted_amount: u64) -> Result<()> {
     let cpi_accounts = Transfer {
         authority: _ctx.accounts.signer.to_account_info(),
         from: _ctx.accounts.sender_ata.to_account_info(),

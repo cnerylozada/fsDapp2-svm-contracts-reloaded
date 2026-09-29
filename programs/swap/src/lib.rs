@@ -14,7 +14,7 @@ pub mod swap {
 
     pub fn make_offer(
         _ctx: Context<MakeOffer>,
-        _id: String,
+        _id: [u8; 16],
         _deposited_amount: u64,
         _wanted_amount: u64,
     ) -> Result<()> {
