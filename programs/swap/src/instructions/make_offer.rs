@@ -33,7 +33,6 @@ pub struct MakeOffer<'info> {
     sender_ata: Account<'info,TokenAccount>,
 
     #[account(
-        mut,
         seeds = [VAULT_OFFER_TAG, _id.as_ref(), signer.key().as_ref()],
         bump
     )]
@@ -64,8 +63,7 @@ pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _deposited_amount: u64, 
 
     let cpi_context = CpiContext::new(token::ID, cpi_accounts);
 
-    let amount_to_transfer = _deposited_amount * 10u64.pow(_ctx.accounts.deposited_mint_account.decimals as u32);
-    transfer(cpi_context, amount_to_transfer)?;
+    transfer(cpi_context, _deposited_amount)?;
 
     *_ctx.accounts.offer = Offer {
         id: _id,
