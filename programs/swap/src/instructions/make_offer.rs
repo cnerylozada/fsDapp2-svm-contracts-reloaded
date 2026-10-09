@@ -11,38 +11,38 @@ use crate::constants::{VAULT_OFFER_TAG,ACCOUNT_DISCRIMINATOR};
 #[instruction(_id: [u8; 16])]
 pub struct MakeOffer<'info> {
     #[account(mut)]
-    signer: Signer<'info>,
+    maker: Signer<'info>,
 
     #[account(
         init,
-        payer = signer,
+        payer = maker,
         space = ACCOUNT_DISCRIMINATOR + Offer::INIT_SPACE,
-        seeds = [Offer::OFFER_TAG, _id.as_ref(), signer.key().as_ref()],
+        seeds = [Offer::OFFER_TAG, _id.as_ref(), maker.key().as_ref()],
         bump
     )]
     offer: Account<'info, Offer>,
 
-    deposited_mint_account: Account<'info, Mint>,
+    offered_mint_account: Account<'info, Mint>,
 
     #[account(
         mut, 
-        associated_token::authority = signer,
-        associated_token::mint = deposited_mint_account,
+        associated_token::mint = offered_mint_account,
+        associated_token::authority = maker,
         associated_token::token_program = token_program
     )]
-    sender_ata: Account<'info,TokenAccount>,
+    maker_offered_ata: Account<'info,TokenAccount>,
 
     #[account(
-        seeds = [VAULT_OFFER_TAG, _id.as_ref(), signer.key().as_ref()],
+        seeds = [VAULT_OFFER_TAG, _id.as_ref(), maker.key().as_ref()],
         bump
     )]
     vault_offer_ata_authority: SystemAccount<'info>,
 
     #[account(
         init_if_needed,
-        payer = signer,
+        payer = maker,
+        associated_token::mint = offered_mint_account,
         associated_token::authority = vault_offer_ata_authority,
-        associated_token::mint = deposited_mint_account,
         associated_token::token_program = token_program
     )]
     vault_offer_ata: Account<'info, TokenAccount>,
@@ -54,22 +54,22 @@ pub struct MakeOffer<'info> {
     token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _deposited_amount: u64, _wanted_amount: u64) -> Result<()> {
+pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _offered_amount: u64, _wanted_amount: u64) -> Result<()> {
     let cpi_accounts = Transfer {
-        authority: _ctx.accounts.signer.to_account_info(),
-        from: _ctx.accounts.sender_ata.to_account_info(),
+        authority: _ctx.accounts.maker.to_account_info(),
+        from: _ctx.accounts.maker_offered_ata.to_account_info(),
         to: _ctx.accounts.vault_offer_ata.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(token::ID, cpi_accounts);
 
-    transfer(cpi_context, _deposited_amount)?;
+    transfer(cpi_context, _offered_amount)?;
 
     *_ctx.accounts.offer = Offer {
         id: _id,
-        user: _ctx.accounts.signer.key(),
-        deposited_mint: _ctx.accounts.deposited_mint_account.key(),
-        deposited_amount: _deposited_amount,
+        maker: _ctx.accounts.maker.key(),
+        offered_mint: _ctx.accounts.offered_mint_account.key(),
+        offered_amount: _offered_amount,
         wanted_mint: _ctx.accounts.wanted_mint_account.key(),
         wanted_amount: _wanted_amount,
         bump: _ctx.bumps.offer

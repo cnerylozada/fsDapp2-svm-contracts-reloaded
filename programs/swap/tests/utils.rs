@@ -15,24 +15,23 @@ pub fn setup_svm() -> (LiteSVM, Keypair, Keypair, Keypair) {
     svm.add_program(program_id, program_bytes);
 
     let token_admin = Keypair::new();
-    let main_user = Keypair::new();
-    let other_user = Keypair::new();
+    let maker = Keypair::new();
+    let taker = Keypair::new();
 
     let default_funds = 1_000_000_000;
 
     svm.airdrop(&token_admin.pubkey(), default_funds).unwrap();
-    svm.airdrop(&main_user.pubkey(), default_funds).unwrap();
-    svm.airdrop(&other_user.pubkey(), default_funds).unwrap();
+    svm.airdrop(&maker.pubkey(), default_funds).unwrap();
+    svm.airdrop(&taker.pubkey(), default_funds).unwrap();
 
-    (svm, token_admin, main_user, other_user)
+    (svm, token_admin, maker, taker)
 }
 
-pub fn create_deposited_and_wanted_mint(
+pub fn create_offered_and_wanted_mint(
     svm: &mut LiteSVM,
     token_admin: &Keypair,
 ) -> (Pubkey, Pubkey) {
-    // Create a new SPL token mint with alice as the mint authority
-    let deposited_mint = CreateMint::new(svm, token_admin)
+    let offered_mint = CreateMint::new(svm, token_admin)
         .authority(&token_admin.pubkey())
         .decimals(DECIMALS)
         .send()
@@ -44,7 +43,7 @@ pub fn create_deposited_and_wanted_mint(
         .send()
         .unwrap();
 
-    (deposited_mint, wanted_mint)
+    (offered_mint, wanted_mint)
 }
 
 pub fn create_and_fund_ata(

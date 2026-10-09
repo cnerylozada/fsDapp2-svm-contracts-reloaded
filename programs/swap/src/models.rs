@@ -4,9 +4,9 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct Offer {
     pub id: [u8; 16],
-    pub user: Pubkey,
-    pub deposited_mint: Pubkey,
-    pub deposited_amount: u64,
+    pub maker: Pubkey,
+    pub offered_mint: Pubkey,
+    pub offered_amount: u64,
     pub wanted_mint: Pubkey,
     pub wanted_amount: u64,
     pub bump: u8,
