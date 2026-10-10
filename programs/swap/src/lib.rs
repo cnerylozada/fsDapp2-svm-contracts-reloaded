@@ -21,7 +21,7 @@ pub mod swap {
         instructions::make_offer::handler(_ctx, _id, _offered_amount, _wanted_amount)
     }
 
-    pub fn take_offer(_ctx: Context<TakeOffer>, _id: [u8; 16]) -> Result<()> {
-        instructions::take_offer::handler(_ctx, _id)
+    pub fn take_offer(_ctx: Context<TakeOffer>) -> Result<()> {
+        instructions::take_offer::handler(_ctx)
     }
 }

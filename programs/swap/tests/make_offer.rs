@@ -19,7 +19,6 @@ const INITIAL_TOKEN_BALANCE_UI: u64 = 15;
 const OFFERED_AMOUNT_UI: u64 = 2;
 const WANTED_AMOUNT_UI: u64 = 3;
 const OFFER_TAG: &[u8; 5] = b"offer";
-const VAULT_OFFER_TAG: &[u8; 11] = b"vault_offer";
 
 #[derive(Debug, BorshDeserialize)]
 struct Offer {
@@ -62,11 +61,7 @@ fn make_offer() {
     let (offer_pda, _) =
         create_pda_by_seeds(&[OFFER_TAG, offer_id.as_ref(), maker.pubkey().as_ref()]);
 
-    let (vault_offer_ata_authority_pda, _) =
-        create_pda_by_seeds(&[VAULT_OFFER_TAG, offer_id.as_ref(), maker.pubkey().as_ref()]);
-
-    let vault_offer_ata_pda =
-        get_associated_token_address(&vault_offer_ata_authority_pda, &offered_mint);
+    let vault_offer_ata_pda = get_associated_token_address(&offer_pda, &offered_mint);
 
     let make_offer_ix = Instruction {
         program_id: swap::ID,
@@ -75,7 +70,6 @@ fn make_offer() {
             AccountMeta::new(offer_pda, false),
             AccountMeta::new_readonly(offered_mint, false),
             AccountMeta::new(maker_offered_ata, false),
-            AccountMeta::new_readonly(vault_offer_ata_authority_pda, false),
             AccountMeta::new(vault_offer_ata_pda, false),
             AccountMeta::new_readonly(wanted_mint, false),
             AccountMeta::new_readonly(system_program::ID, false),

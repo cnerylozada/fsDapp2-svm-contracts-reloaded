@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{self, transfer, Mint, Token, TokenAccount, Transfer},
 };
 use crate::models::{Offer};
-use crate::constants::{VAULT_OFFER_TAG,ACCOUNT_DISCRIMINATOR};
+use crate::constants::{ACCOUNT_DISCRIMINATOR};
 
 
 #[derive(Accounts)]
@@ -33,16 +33,10 @@ pub struct MakeOffer<'info> {
     maker_offered_ata: Account<'info,TokenAccount>,
 
     #[account(
-        seeds = [VAULT_OFFER_TAG, _id.as_ref(), maker.key().as_ref()],
-        bump
-    )]
-    vault_offer_ata_authority: SystemAccount<'info>,
-
-    #[account(
-        init_if_needed,
+        init,
         payer = maker,
         associated_token::mint = offered_mint_account,
-        associated_token::authority = vault_offer_ata_authority,
+        associated_token::authority = offer,
         associated_token::token_program = token_program
     )]
     vault_offer_ata: Account<'info, TokenAccount>,
