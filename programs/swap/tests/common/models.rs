@@ -1,5 +1,15 @@
 use borsh::BorshDeserialize;
+use litesvm::LiteSVM;
 use solana_sdk::pubkey::Pubkey;
+use solana_sdk::signature::Keypair;
+
+pub struct TestEnv {
+    pub svm: LiteSVM,
+    pub maker: Keypair,
+    pub offered_mint: Pubkey,
+    pub maker_offered_ata: Pubkey,
+    pub wanted_mint: Pubkey,
+}
 
 pub struct MakeOfferAccounts {
     pub offer_pda: Pubkey,

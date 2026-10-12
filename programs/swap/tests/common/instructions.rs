@@ -33,16 +33,16 @@ pub fn create_offered_and_wanted_mint(
 pub fn create_and_fund_ata(
     svm: &mut LiteSVM,
     token_admin: &Keypair,
-    mint: &Pubkey,
-    owner: &Pubkey,
+    mint: Pubkey,
+    owner: Pubkey,
     amount: u64,
 ) -> Pubkey {
-    let ata = CreateAssociatedTokenAccount::new(svm, token_admin, mint)
-        .owner(owner)
+    let ata = CreateAssociatedTokenAccount::new(svm, token_admin, &mint)
+        .owner(&owner)
         .send()
         .unwrap();
 
-    MintTo::new(svm, token_admin, mint, &ata, amount)
+    MintTo::new(svm, token_admin, &mint, &ata, amount)
         .owner(token_admin)
         .send()
         .unwrap();
@@ -51,9 +51,9 @@ pub fn create_and_fund_ata(
 }
 
 pub fn build_make_offer_tx(
-    svm: &mut LiteSVM,
+    svm: &LiteSVM,
     maker: &Keypair,
-    accounts: MakeOfferAccounts,
+    accounts: &MakeOfferAccounts,
     args: MakeOfferArgs,
 ) -> Transaction {
     let MakeOfferAccounts {
@@ -62,7 +62,8 @@ pub fn build_make_offer_tx(
         maker_offered_ata,
         vault_offer_ata_pda,
         wanted_mint,
-    } = accounts;
+    } = *accounts;
+
     let MakeOfferArgs {
         id,
         offered_amount,
