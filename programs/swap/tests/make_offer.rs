@@ -1,5 +1,5 @@
 use borsh::BorshDeserialize;
-use litesvm_token::{get_spl_account, spl_token::state::Account as TokenAccount};
+use litesvm_token::{get_spl_account, spl_token::state::Account as TokenAccount, Transfer};
 use solana_sdk::signer::Signer;
 
 mod common;
@@ -68,7 +68,7 @@ fn make_offer_moves_tokens_to_vault_and_stores_offer() {
 }
 
 #[test]
-pub fn make_offer_test_2() {
+pub fn make_offer_vault_accepts_direct_deposits() {
     let maker_offered_ata_initial_balance = to_base_units(INITIAL_TOKEN_BALANCE_UI);
 
     let mut env = setup_test_env(maker_offered_ata_initial_balance);
@@ -85,4 +85,33 @@ pub fn make_offer_test_2() {
     let make_offer_tx = build_make_offer_tx(&env.svm, &env.maker, &accounts, args);
     let make_offer_tx_result = env.svm.send_transaction(make_offer_tx);
     assert_eq!(make_offer_tx_result.is_ok(), true);
+
+    let vault_offer_ata_account_before: TokenAccount =
+        get_spl_account(&env.svm, &accounts.vault_offer_ata_pda).unwrap();
+    assert_eq!(
+        vault_offer_ata_account_before.amount,
+        to_base_units(OFFERED_AMOUNT_UI)
+    );
+
+    let amount_to_transfer = to_base_units(1);
+
+    Transfer::new(
+        &mut env.svm,
+        &env.maker,
+        &env.offered_mint,
+        &accounts.vault_offer_ata_pda,
+        amount_to_transfer,
+    )
+    .source(&env.maker_offered_ata)
+    .owner(&env.maker)
+    .send()
+    .unwrap();
+
+    let vault_offer_ata_account_after: TokenAccount =
+        get_spl_account(&env.svm, &accounts.vault_offer_ata_pda).unwrap();
+
+    assert_eq!(
+        vault_offer_ata_account_after.amount,
+        to_base_units(OFFERED_AMOUNT_UI + 1)
+    )
 }

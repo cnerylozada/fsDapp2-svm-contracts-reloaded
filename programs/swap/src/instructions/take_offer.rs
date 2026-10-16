@@ -29,7 +29,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = offer,
         associated_token::token_program = token_program,
     )]
-    vault_offer_ata: Account<'info, TokenAccount>,
+    vault_offer_ata: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -38,7 +38,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = taker,
         associated_token::token_program = token_program
     )]
-    taker_offered_ata: Account<'info, TokenAccount>,
+    taker_offered_ata: Box<Account<'info, TokenAccount>>,
 
     wanted_mint: Account<'info, Mint>,
 
@@ -48,7 +48,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = taker,
         associated_token::token_program =token_program
     )]
-    taker_wanted_ata: Account<'info, TokenAccount>,
+    taker_wanted_ata: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -57,7 +57,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = maker,
         associated_token::token_program = token_program
     )]
-    maker_wanted_ata: Account<'info, TokenAccount>,
+    maker_wanted_ata: Box<Account<'info, TokenAccount>>,
 
     system_program: Program<'info, System>,
     associated_token_program: Program<'info, AssociatedToken>,
