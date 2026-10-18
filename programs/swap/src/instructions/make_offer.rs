@@ -22,11 +22,11 @@ pub struct MakeOffer<'info> {
     )]
     offer: Account<'info, Offer>,
 
-    offered_mint_account: Account<'info, Mint>,
+    offered_mint: Account<'info, Mint>,
 
     #[account(
         mut, 
-        associated_token::mint = offered_mint_account,
+        associated_token::mint = offered_mint,
         associated_token::authority = maker,
         associated_token::token_program = token_program
     )]
@@ -35,13 +35,13 @@ pub struct MakeOffer<'info> {
     #[account(
         init,
         payer = maker,
-        associated_token::mint = offered_mint_account,
+        associated_token::mint = offered_mint,
         associated_token::authority = offer,
         associated_token::token_program = token_program
     )]
-    vault_offer_ata: Account<'info, TokenAccount>,
+    vault_offered_ata: Account<'info, TokenAccount>,
 
-    wanted_mint_account: Account<'info, Mint>,
+    wanted_mint: Account<'info, Mint>,
 
     system_program: Program<'info, System>,
     associated_token_program: Program<'info, AssociatedToken>,
@@ -52,7 +52,7 @@ pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _offered_amount: u64, _w
     let cpi_accounts = Transfer {
         authority: _ctx.accounts.maker.to_account_info(),
         from: _ctx.accounts.maker_offered_ata.to_account_info(),
-        to: _ctx.accounts.vault_offer_ata.to_account_info(),
+        to: _ctx.accounts.vault_offered_ata.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(token::ID, cpi_accounts);
@@ -62,9 +62,9 @@ pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _offered_amount: u64, _w
     *_ctx.accounts.offer = Offer {
         id: _id,
         maker: _ctx.accounts.maker.key(),
-        offered_mint: _ctx.accounts.offered_mint_account.key(),
+        offered_mint: _ctx.accounts.offered_mint.key(),
         offered_amount: _offered_amount,
-        wanted_mint: _ctx.accounts.wanted_mint_account.key(),
+        wanted_mint: _ctx.accounts.wanted_mint.key(),
         wanted_amount: _wanted_amount,
         bump: _ctx.bumps.offer
     };

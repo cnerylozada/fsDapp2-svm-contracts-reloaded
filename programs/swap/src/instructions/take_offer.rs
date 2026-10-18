@@ -29,7 +29,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = offer,
         associated_token::token_program = token_program,
     )]
-    vault_offer_ata: Box<Account<'info, TokenAccount>>,
+    vault_offered_ata: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -85,7 +85,7 @@ impl<'info> TakeOffer<'info> {
 
     fn withdraw_from_vault(&self) -> Result<()> {
         let cpi_acccounts = Transfer {
-            from: self.vault_offer_ata.to_account_info(),
+            from: self.vault_offered_ata.to_account_info(),
             to: self.taker_offered_ata.to_account_info(),
             authority: self.offer.to_account_info(),
         };
@@ -100,6 +100,6 @@ impl<'info> TakeOffer<'info> {
         ]];
         let cpi_context = CpiContext::new_with_signer(token::ID, cpi_acccounts, signer_seeds);
 
-        transfer(cpi_context, self.vault_offer_ata.amount)
+        transfer(cpi_context, self.vault_offered_ata.amount)
     }
 }

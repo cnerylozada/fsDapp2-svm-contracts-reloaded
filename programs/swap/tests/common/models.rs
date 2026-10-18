@@ -9,16 +9,20 @@ pub struct TestEnv {
     pub offered_mint: Pubkey,
     pub maker_offered_ata: Pubkey,
     pub wanted_mint: Pubkey,
+    pub taker: Keypair,
+    pub taker_wanted_ata: Pubkey,
 }
 
+#[derive(Clone, Copy)]
 pub struct MakeOfferAccounts {
     pub offer_pda: Pubkey,
     pub offered_mint: Pubkey,
     pub maker_offered_ata: Pubkey,
-    pub vault_offer_ata_pda: Pubkey,
+    pub vault_offered_ata: Pubkey,
     pub wanted_mint: Pubkey,
 }
 
+#[derive(Clone, Copy)]
 pub struct MakeOfferArgs {
     pub id: [u8; 16],
     pub offered_amount: u64,
@@ -34,4 +38,16 @@ pub struct Offer {
     pub wanted_mint: Pubkey,
     pub wanted_amount: u64,
     pub bump: u8,
+}
+
+#[derive(Clone, Copy)]
+pub struct TakeOfferAccounts {
+    pub offered_mint: Pubkey,
+    pub maker: Pubkey,
+    pub offer_pda: Pubkey,
+    pub vault_offered_ata: Pubkey,
+    pub taker_offered_ata: Pubkey,
+    pub wanted_mint: Pubkey,
+    pub taker_wanted_ata: Pubkey,
+    pub maker_wanted_ata: Pubkey,
 }

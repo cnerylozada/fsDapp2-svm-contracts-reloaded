@@ -19,43 +19,40 @@ fn make_offer_moves_tokens_to_vault_and_stores_offer() {
 
     let mut env = setup_test_env(maker_offered_ata_initial_balance);
 
-    let maker_offered_ata_account_before: TokenAccount =
+    let maker_offered_ata_before: TokenAccount =
         get_spl_account(&env.svm, &env.maker_offered_ata).unwrap();
-    assert_eq!(maker_offered_ata_account_before.mint, env.offered_mint);
-    assert_eq!(maker_offered_ata_account_before.owner, env.maker.pubkey());
+    assert_eq!(maker_offered_ata_before.mint, env.offered_mint);
+    assert_eq!(maker_offered_ata_before.owner, env.maker.pubkey());
     assert_eq!(
-        maker_offered_ata_account_before.amount,
+        maker_offered_ata_before.amount,
         maker_offered_ata_initial_balance
     );
 
     let offer_id = supabase_id_to_bytes(OFFER_SUPABASE_ID);
 
-    let accounts = derive_make_offer_accounts(&env, offer_id);
+    let make_offer_accounts = derive_make_offer_accounts(&env, offer_id);
     let args = MakeOfferArgs {
         id: offer_id,
         offered_amount: to_base_units(OFFERED_AMOUNT_UI),
         wanted_amount: to_base_units(WANTED_AMOUNT_UI),
     };
 
-    let make_offer_tx = build_make_offer_tx(&env.svm, &env.maker, &accounts, args);
+    let make_offer_tx = build_make_offer_tx(&env.svm, &env.maker, make_offer_accounts, args);
     let make_offer_tx_result = env.svm.send_transaction(make_offer_tx);
     assert_eq!(make_offer_tx_result.is_ok(), true);
 
-    let maker_offered_ata_account_after: TokenAccount =
+    let maker_offered_ata_after: TokenAccount =
         get_spl_account(&env.svm, &env.maker_offered_ata).unwrap();
     assert_eq!(
-        maker_offered_ata_account_after.amount,
+        maker_offered_ata_after.amount,
         to_base_units(INITIAL_TOKEN_BALANCE_UI - OFFERED_AMOUNT_UI)
     );
 
-    let vault_offer_ata_account: TokenAccount =
-        get_spl_account(&env.svm, &accounts.vault_offer_ata_pda).unwrap();
-    assert_eq!(
-        vault_offer_ata_account.amount,
-        to_base_units(OFFERED_AMOUNT_UI)
-    );
+    let vault_offer_ata: TokenAccount =
+        get_spl_account(&env.svm, &make_offer_accounts.vault_offered_ata).unwrap();
+    assert_eq!(vault_offer_ata.amount, to_base_units(OFFERED_AMOUNT_UI));
 
-    let offer_account_raw = env.svm.get_account(&accounts.offer_pda).unwrap();
+    let offer_account_raw = env.svm.get_account(&make_offer_accounts.offer_pda).unwrap();
     let offer_account =
         Offer::deserialize(&mut &offer_account_raw.data[8..]).expect("Failed to deserialize Offer");
 
@@ -75,19 +72,19 @@ pub fn make_offer_vault_accepts_direct_deposits() {
 
     let offer_id = supabase_id_to_bytes(OFFER_SUPABASE_ID);
 
-    let accounts = derive_make_offer_accounts(&env, offer_id);
+    let make_offer_accounts = derive_make_offer_accounts(&env, offer_id);
     let args = MakeOfferArgs {
         id: offer_id,
         offered_amount: to_base_units(OFFERED_AMOUNT_UI),
         wanted_amount: to_base_units(WANTED_AMOUNT_UI),
     };
 
-    let make_offer_tx = build_make_offer_tx(&env.svm, &env.maker, &accounts, args);
+    let make_offer_tx = build_make_offer_tx(&env.svm, &env.maker, make_offer_accounts, args);
     let make_offer_tx_result = env.svm.send_transaction(make_offer_tx);
     assert_eq!(make_offer_tx_result.is_ok(), true);
 
     let vault_offer_ata_account_before: TokenAccount =
-        get_spl_account(&env.svm, &accounts.vault_offer_ata_pda).unwrap();
+        get_spl_account(&env.svm, &make_offer_accounts.vault_offered_ata).unwrap();
     assert_eq!(
         vault_offer_ata_account_before.amount,
         to_base_units(OFFERED_AMOUNT_UI)
@@ -99,7 +96,7 @@ pub fn make_offer_vault_accepts_direct_deposits() {
         &mut env.svm,
         &env.maker,
         &env.offered_mint,
-        &accounts.vault_offer_ata_pda,
+        &make_offer_accounts.vault_offered_ata,
         amount_to_transfer,
     )
     .source(&env.maker_offered_ata)
@@ -108,7 +105,7 @@ pub fn make_offer_vault_accepts_direct_deposits() {
     .unwrap();
 
     let vault_offer_ata_account_after: TokenAccount =
-        get_spl_account(&env.svm, &accounts.vault_offer_ata_pda).unwrap();
+        get_spl_account(&env.svm, &make_offer_accounts.vault_offered_ata).unwrap();
 
     assert_eq!(
         vault_offer_ata_account_after.amount,
