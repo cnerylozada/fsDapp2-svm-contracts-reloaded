@@ -8,7 +8,7 @@ use crate::constants::{ACCOUNT_DISCRIMINATOR};
 
 
 #[derive(Accounts)]
-#[instruction(_id: [u8; 16])]
+#[instruction(id: [u8; 16])]
 pub struct MakeOffer<'info> {
     #[account(mut)]
     maker: Signer<'info>,
@@ -17,7 +17,7 @@ pub struct MakeOffer<'info> {
         init,
         payer = maker,
         space = ACCOUNT_DISCRIMINATOR + Offer::INIT_SPACE,
-        seeds = [Offer::OFFER_TAG, _id.as_ref(), maker.key().as_ref()],
+        seeds = [Offer::OFFER_TAG, id.as_ref(), maker.key().as_ref()],
         bump
     )]
     offer: Account<'info, Offer>,
@@ -48,25 +48,25 @@ pub struct MakeOffer<'info> {
     token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<MakeOffer>, _id: [u8; 16], _offered_amount: u64, _wanted_amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<MakeOffer>, id: [u8; 16], offered_amount: u64, wanted_amount: u64) -> Result<()> {
     let cpi_accounts = Transfer {
-        authority: _ctx.accounts.maker.to_account_info(),
-        from: _ctx.accounts.maker_offered_ata.to_account_info(),
-        to: _ctx.accounts.vault_offered_ata.to_account_info(),
+        authority: ctx.accounts.maker.to_account_info(),
+        from: ctx.accounts.maker_offered_ata.to_account_info(),
+        to: ctx.accounts.vault_offered_ata.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(token::ID, cpi_accounts);
 
-    transfer(cpi_context, _offered_amount)?;
+    transfer(cpi_context, offered_amount)?;
 
-    *_ctx.accounts.offer = Offer {
-        id: _id,
-        maker: _ctx.accounts.maker.key(),
-        offered_mint: _ctx.accounts.offered_mint.key(),
-        offered_amount: _offered_amount,
-        wanted_mint: _ctx.accounts.wanted_mint.key(),
-        wanted_amount: _wanted_amount,
-        bump: _ctx.bumps.offer
+    *ctx.accounts.offer = Offer {
+        id,
+        maker: ctx.accounts.maker.key(),
+        offered_mint: ctx.accounts.offered_mint.key(),
+        offered_amount,
+        wanted_mint: ctx.accounts.wanted_mint.key(),
+        wanted_amount,
+        bump: ctx.bumps.offer
     };
 
     Ok(())

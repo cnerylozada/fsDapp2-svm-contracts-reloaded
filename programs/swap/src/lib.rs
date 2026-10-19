@@ -13,15 +13,15 @@ pub mod swap {
     use super::*;
 
     pub fn make_offer(
-        _ctx: Context<MakeOffer>,
-        _id: [u8; 16],
-        _offered_amount: u64,
-        _wanted_amount: u64,
+        ctx: Context<MakeOffer>,
+        id: [u8; 16],
+        offered_amount: u64,
+        wanted_amount: u64,
     ) -> Result<()> {
-        instructions::make_offer::handler(_ctx, _id, _offered_amount, _wanted_amount)
+        instructions::make_offer::handler(ctx, id, offered_amount, wanted_amount)
     }
 
-    pub fn take_offer(_ctx: Context<TakeOffer>) -> Result<()> {
-        instructions::take_offer::handler(_ctx)
+    pub fn take_offer(ctx: Context<TakeOffer>) -> Result<()> {
+        instructions::take_offer::handler(ctx)
     }
 }

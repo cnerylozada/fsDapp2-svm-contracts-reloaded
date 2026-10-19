@@ -12,11 +12,11 @@ declare_id!("CGUBBtJSaJXcrieV9x7KYGTsdJJuRb819NxbKzCo7EFM");
 pub mod simple_transfer {
     use super::*;
 
-    pub fn create_deposit(_ctx: Context<CreateDeposit>, _goal: String, _amount: u64) -> Result<()> {
-        create_deposit::handler(_ctx, _goal, _amount)
+    pub fn create_deposit(ctx: Context<CreateDeposit>, goal: String, amount: u64) -> Result<()> {
+        create_deposit::handler(ctx, goal, amount)
     }
 
-    pub fn withdraw(_ctx: Context<Withdraw>, _goal: String, _amount: u64) -> Result<()> {
-        withdraw::handler(_ctx, _goal, _amount)
+    pub fn withdraw(ctx: Context<Withdraw>, goal: String, amount: u64) -> Result<()> {
+        withdraw::handler(ctx, goal, amount)
     }
 }

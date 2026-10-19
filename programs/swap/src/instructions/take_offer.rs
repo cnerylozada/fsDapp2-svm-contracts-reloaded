@@ -64,9 +64,9 @@ pub struct TakeOffer<'info> {
     token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<TakeOffer>) -> Result<()> {
-    _ctx.accounts.pay_maker()?;
-    _ctx.accounts.withdraw_from_vault()?;
+pub fn handler(ctx: Context<TakeOffer>) -> Result<()> {
+    ctx.accounts.pay_maker()?;
+    ctx.accounts.withdraw_from_vault()?;
 
     Ok(())
 }

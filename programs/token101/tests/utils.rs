@@ -84,7 +84,7 @@ pub fn create_deposit_tx(
             AccountMeta::new_readonly(spl_associated_token_account::id(), false),
             AccountMeta::new_readonly(TOKEN_ID, false),
         ],
-        data: token101::instruction::CreateDeposit { _amount: amount }.data(),
+        data: token101::instruction::CreateDeposit { amount }.data(),
     };
 
     Transaction::new_signed_with_payer(

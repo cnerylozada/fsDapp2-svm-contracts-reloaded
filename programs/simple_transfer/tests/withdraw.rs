@@ -39,8 +39,8 @@ fn withdraw() {
             AccountMeta::new_readonly(system_program::ID, false),
         ],
         data: simple_transfer::instruction::Withdraw {
-            _amount: amount_to_withdraw,
-            _goal: inputs.goal,
+            amount: amount_to_withdraw,
+            goal: inputs.goal,
         }
         .data(),
     };

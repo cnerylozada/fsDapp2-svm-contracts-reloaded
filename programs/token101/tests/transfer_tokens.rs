@@ -65,7 +65,7 @@ pub fn transfer_tokens() {
             AccountMeta::new_readonly(TOKEN_ID, false),
         ],
         data: token101::instruction::TransferTokens {
-            _amount: TRANSFER_AMOUNT_UI,
+            amount: TRANSFER_AMOUNT_UI,
         }
         .data(),
     };

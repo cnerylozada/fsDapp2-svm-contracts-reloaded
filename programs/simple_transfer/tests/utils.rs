@@ -63,8 +63,8 @@ pub fn create_deposit_tx(
             AccountMeta::new_readonly(system_program::ID, false),
         ],
         data: simple_transfer::instruction::CreateDeposit {
-            _amount: inputs.amount,
-            _goal: inputs.goal.clone(),
+            amount: inputs.amount,
+            goal: inputs.goal.clone(),
         }
         .data(),
     };

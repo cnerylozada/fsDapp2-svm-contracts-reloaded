@@ -84,9 +84,9 @@ pub fn build_make_offer_tx(
             AccountMeta::new_readonly(TOKEN_ID, false),
         ],
         data: swap::instruction::MakeOffer {
-            _id: id,
-            _offered_amount: offered_amount,
-            _wanted_amount: wanted_amount,
+            id,
+            offered_amount,
+            wanted_amount,
         }
         .data(),
     };

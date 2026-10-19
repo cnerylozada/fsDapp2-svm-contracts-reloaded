@@ -40,20 +40,20 @@ pub struct TransferTokens<'info> {
     token_program: Program<'info, Token>,
 }
 
-pub fn handler(_ctx: Context<TransferTokens>, _amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<TransferTokens>, amount: u64) -> Result<()> {
     let cpi_accounts = Transfer {
-        authority: _ctx.accounts.vault_authority.to_account_info(),
-        from: _ctx.accounts.vault_ata.to_account_info(),
-        to: _ctx.accounts.recipient_ata.to_account_info(),
+        authority: ctx.accounts.vault_authority.to_account_info(),
+        from: ctx.accounts.vault_ata.to_account_info(),
+        to: ctx.accounts.recipient_ata.to_account_info(),
     };
 
-    let signer_key = _ctx.accounts.signer.key();
-    let bump_seed = _ctx.bumps.vault_authority;
+    let signer_key = ctx.accounts.signer.key();
+    let bump_seed = ctx.bumps.vault_authority;
     let signer_seeds: &[&[&[u8]]] = &[&[RECIPIENT_VAULT_TAG, signer_key.as_ref(), &[bump_seed]]];
 
     let cpi_context = CpiContext::new(token::ID, cpi_accounts).with_signer(signer_seeds);
 
-    let amount_to_transfer = _amount * 10u64.pow(_ctx.accounts.mint_account.decimals as u32);
+    let amount_to_transfer = amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32);
     transfer(cpi_context, amount_to_transfer)?;
     Ok(())
 }
