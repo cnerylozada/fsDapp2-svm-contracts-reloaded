@@ -5,8 +5,8 @@ use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
     signature::{Keypair, Signer},
+    transaction::Transaction,
 };
-use solana_transaction::Transaction;
 
 pub struct CreateDepositInput {
     pub goal: String,

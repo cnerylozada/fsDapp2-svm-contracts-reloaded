@@ -3,8 +3,8 @@ use anchor_lang::InstructionData;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     signature::Signer,
+    transaction::Transaction,
 };
-use solana_transaction::Transaction;
 
 mod utils;
 use utils::{create_deposit_tx, get_create_deposit_pdas, setup_svm, CreateDepositInput};

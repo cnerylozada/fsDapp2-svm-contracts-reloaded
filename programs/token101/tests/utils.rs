@@ -7,8 +7,8 @@ use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
     signature::{Keypair, Signer},
+    transaction::Transaction,
 };
-use solana_transaction::Transaction;
 
 pub fn setup_svm() -> (LiteSVM, Keypair, Keypair) {
     let mut svm = LiteSVM::new();

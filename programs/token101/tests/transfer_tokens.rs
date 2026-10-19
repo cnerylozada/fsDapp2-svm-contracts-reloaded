@@ -3,8 +3,8 @@ use litesvm_token::{get_spl_account, spl_token::state::Account as TokenAccount, 
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     signature::Signer,
+    transaction::Transaction,
 };
-use solana_transaction::Transaction;
 use spl_associated_token_account::get_associated_token_address;
 
 mod utils;
