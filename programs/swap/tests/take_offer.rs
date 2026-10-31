@@ -11,9 +11,9 @@ const OFFER_SUPABASE_ID: &str = "c29c3e20-931d-4b75-9de3-103c48ac2976";
 
 #[test]
 fn take_offer() {
-    let maker_offered_ata_initial_balance = to_base_units(INITIAL_TOKEN_BALANCE_UI);
+    let initial_offered_balance = to_base_units(INITIAL_TOKEN_BALANCE_UI);
 
-    let mut env = setup_test_env(maker_offered_ata_initial_balance);
+    let mut env = setup_test_env(initial_offered_balance);
 
     let offer_id = supabase_id_to_bytes(OFFER_SUPABASE_ID);
 

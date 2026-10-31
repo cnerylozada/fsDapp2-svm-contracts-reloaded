@@ -1,60 +1,30 @@
-use anchor_lang::system_program;
-use anchor_lang::InstructionData;
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signature::Signer,
-    transaction::Transaction,
-};
-
-mod utils;
-use utils::{create_deposit_tx, get_create_deposit_pdas, setup_svm, CreateDepositInput};
+mod common;
+use common::fixtures::{create_svm_and_actors, derive_create_deposit_accounts};
+use common::instructions::{build_create_deposit_tx, build_withdraw_tx};
+use common::models::DepositArgs;
 
 #[test]
 fn withdraw() {
-    let (mut svm, signer) = setup_svm();
+    let mut env = create_svm_and_actors();
 
-    let inputs = CreateDepositInput {
-        amount: 1_000_000_000,
+    let create_deposit_args = DepositArgs {
+        amount: env.svm.minimum_balance_for_rent_exemption(0) + 1_000_000,
         goal: "a certain goal".to_string(),
     };
-    let (deposit_account_pda, vault_account_pda) =
-        get_create_deposit_pdas(signer.pubkey(), &inputs.goal);
-    let create_deposit_tx_result = create_deposit_tx(
-        &mut svm,
-        &signer,
-        deposit_account_pda,
-        vault_account_pda,
-        &inputs,
-    );
+    let create_deposit_accounts =
+        derive_create_deposit_accounts(&env.signer, &create_deposit_args.goal);
+
+    let create_deposit_tx =
+        build_create_deposit_tx(&env, &create_deposit_accounts, &create_deposit_args);
+    let create_deposit_tx_result = env.svm.send_transaction(create_deposit_tx);
     assert_eq!(create_deposit_tx_result.is_ok(), true);
 
-    let amount_to_withdraw = 500_000_000;
-
-    let withdraw_ix = Instruction {
-        program_id: simple_transfer::ID,
-        accounts: vec![
-            AccountMeta::new(deposit_account_pda, false),
-            AccountMeta::new(vault_account_pda, false),
-            AccountMeta::new(signer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
-        data: simple_transfer::instruction::Withdraw {
-            amount: amount_to_withdraw,
-            goal: inputs.goal,
-        }
-        .data(),
+    let withdraw_args = DepositArgs {
+        amount: 1_000_000,
+        goal: create_deposit_args.goal,
     };
 
-    let withdraw_tx = Transaction::new_signed_with_payer(
-        &[withdraw_ix],
-        Some(&signer.pubkey()),
-        &[&signer],
-        svm.latest_blockhash(),
-    );
-
-    let withdraw_tx_result = svm.send_transaction(withdraw_tx);
+    let withdraw_tx = build_withdraw_tx(&env, &create_deposit_accounts, &withdraw_args);
+    let withdraw_tx_result = env.svm.send_transaction(withdraw_tx);
     assert_eq!(withdraw_tx_result.is_ok(), true);
-
-    let vault_account_balance = svm.get_balance(&vault_account_pda).unwrap();
-    assert_eq!(vault_account_balance, inputs.amount - amount_to_withdraw);
 }

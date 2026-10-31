@@ -1,7 +1,6 @@
 use borsh::BorshDeserialize;
 use litesvm::LiteSVM;
-use solana_sdk::pubkey::Pubkey;
-use solana_sdk::signature::Keypair;
+use solana_sdk::{pubkey::Pubkey, signature::Keypair};
 
 pub struct TestEnv {
     pub svm: LiteSVM,

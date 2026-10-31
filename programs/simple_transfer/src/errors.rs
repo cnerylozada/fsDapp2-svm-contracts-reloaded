@@ -8,7 +8,7 @@ pub enum SimpleTransferError {
     #[msg("Amount must be greater than zero")]
     InvalidAmount,
 
-    #[msg("Withdrawal exceeds the vault balance")]
+    #[msg("Insufficient amount: below the minimum deposit, or more than the vault holds")]
     InsufficientDeposit,
 
     #[msg("Withdrawal would leave the vault below the minimum balance")]

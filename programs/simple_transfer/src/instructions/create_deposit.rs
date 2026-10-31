@@ -7,6 +7,9 @@ use anchor_lang::system_program::{transfer, Transfer};
 #[derive(Accounts)]
 #[instruction(goal: String)]
 pub struct CreateDeposit<'info> {
+    #[account(mut)]
+    signer: Signer<'info>,
+
     #[account(
         init,
         space = ACCOUNT_DISCRIMINATOR + DepositAccount::INIT_SPACE,
@@ -23,9 +26,6 @@ pub struct CreateDeposit<'info> {
     )]
     vault_account: SystemAccount<'info>,
 
-    #[account(mut)]
-    signer: Signer<'info>,
-
     system_program: Program<'info, System>,
 }
 
@@ -35,13 +35,17 @@ pub fn handler(ctx: Context<CreateDeposit>, goal: String, amount: u64) -> Result
         return Err(SimpleTransferError::InvalidGoalLength.into());
     }
 
-    if amount <= DepositAccount::MIN_VAULT_DEPOSIT {
+    // The vault is a System account with no data, created by this first transfer. The runtime
+    // rejects a new account that ends below its rent-exempt minimum (`minimum_balance(0)`), so the
+    // deposit must cover that floor. It is not a fee: it stays in the vault and only comes back
+    // when the vault is emptied. MIN_BUSINESS_DEPOSIT is our own rule, on top of the rent.
+    let min_vault_deposit = Rent::get()?.minimum_balance(0) + DepositAccount::MIN_BUSINESS_DEPOSIT;
+    if amount < min_vault_deposit {
         return Err(SimpleTransferError::InsufficientDeposit.into());
     }
 
     *ctx.accounts.deposit_account = DepositAccount {
         owner: ctx.accounts.signer.key(),
-        amount,
         goal,
         bump: ctx.bumps.deposit_account,
     };
