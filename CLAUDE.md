@@ -197,6 +197,25 @@ What happens when they are wrong:
 
 The fee payer is the first signer in the transaction and is always writable. `Transaction::new_signed_with_payer(.., Some(&signer.pubkey()), ..)` adds that for you, and the account is also `new(.., true)` in the list because the program uses it.
 
+## Closing accounts: `close = ...` vs a CPI
+
+Only the program that **owns** an account can take lamports out of it or change its data (anyone can credit it). That decides how to close it.
+
+- **`close = destination`** edits the account directly after the handler returns: it moves all lamports to `destination`, zeroes the data (the discriminator too) and reassigns the owner to the System program. So it only works on accounts owned by this program (`Offer`, `DepositAccount`).
+- **Accounts owned by another program** can't be edited by us (the runtime rejects it). Ask the owner with a CPI, like calling a function on another contract in the EVM.
+
+| Account | Owner | How to close it |
+|---|---|---|
+| Our `#[account]` structs (`Offer`, `DepositAccount`) | our program | `close = <destination>` |
+| Token account (`vault_offered_ata`) | token program | CPI `token::close_account`: balance must be 0, authority signs |
+| System vault (`simple_transfer`) | System program | Drain it with a System `transfer` signed by the PDA. At 0 lamports it disappears |
+
+Rules:
+- **Destination:** refund the rent to whoever paid it (the maker in `swap`). It must be writable: `#[account(mut)]` and `AccountMeta::new`.
+- **Order:** the vault's `close_account` CPI runs in the handler while `offer` still exists (it signs). `close = maker` on `offer` takes effect last.
+- **Replays:** closing `offer` makes a second `take_offer` fail at account validation. Accounts the users keep (`taker_*_ata`, `maker_wanted_ata`) stay open.
+- **Tests:** a closed account reads as `None` from `svm.get_account(..)`, so assert `is_none()` and don't `.unwrap()` it.
+
 ## Working with the author
 
 - Diagnose in text first and offer the fix. Don't edit or run builds unless asked. The author usually runs `anchor build` and the tests themselves.

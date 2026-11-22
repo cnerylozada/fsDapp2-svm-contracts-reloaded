@@ -66,7 +66,12 @@ fn take_offer() {
         to_base_units(WANTED_AMOUNT_UI)
     );
 
-    let vault_offered_ata_after: TokenAccount =
-        get_spl_account(&env.svm, &take_offer_accounts.vault_offered_ata).unwrap();
-    assert_eq!(vault_offered_ata_after.amount, 0);
+    assert!(env
+        .svm
+        .get_account(&take_offer_accounts.offer_pda)
+        .is_none());
+    assert!(env
+        .svm
+        .get_account(&take_offer_accounts.vault_offered_ata)
+        .is_none());
 }

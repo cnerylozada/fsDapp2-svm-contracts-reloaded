@@ -120,7 +120,7 @@ pub fn build_take_offer_tx(
         accounts: vec![
             AccountMeta::new(taker.pubkey(), true),
             AccountMeta::new_readonly(offered_mint, false),
-            AccountMeta::new_readonly(maker, false),
+            AccountMeta::new(maker, false),
             AccountMeta::new(offer_pda, false),
             AccountMeta::new(vault_offered_ata, false),
             AccountMeta::new(taker_offered_ata, false),

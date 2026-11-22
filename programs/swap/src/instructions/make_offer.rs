@@ -5,6 +5,7 @@ use anchor_spl::{
 };
 use crate::models::{Offer};
 use crate::constants::{ACCOUNT_DISCRIMINATOR};
+use crate::errors::ErrorCode;
 
 
 #[derive(Accounts)]
@@ -49,6 +50,12 @@ pub struct MakeOffer<'info> {
 }
 
 pub fn handler(ctx: Context<MakeOffer>, id: [u8; 16], offered_amount: u64, wanted_amount: u64) -> Result<()> {
+    // A zero offered_amount would lock an empty vault, and a zero wanted_amount would let anyone
+    // take the offered tokens for free.
+    if offered_amount == 0 || wanted_amount == 0 {
+        return Err(ErrorCode::InvalidAmount.into());
+    }
+
     let cpi_accounts = Transfer {
         authority: ctx.accounts.maker.to_account_info(),
         from: ctx.accounts.maker_offered_ata.to_account_info(),
