@@ -6,6 +6,7 @@ use common::utils::{
     supabase_id_to_bytes, to_base_units, INITIAL_TOKEN_BALANCE_UI, OFFERED_AMOUNT_UI,
     WANTED_AMOUNT_UI,
 };
+use litesvm_token::{get_spl_account, spl_token::state::Account as TokenAccount, Transfer};
 
 const OFFER_SUPABASE_ID: &str = "c29c3e20-931d-4b75-9de3-103c48ac2976";
 
@@ -33,7 +34,39 @@ fn take_offer() {
         make_offer_accounts.offer_pda,
         make_offer_accounts.vault_offered_ata,
     );
+    let taker_wanted_ata_before: TokenAccount =
+        get_spl_account(&env.svm, &take_offer_accounts.taker_wanted_ata).unwrap();
+    assert_eq!(
+        taker_wanted_ata_before.amount,
+        to_base_units(INITIAL_TOKEN_BALANCE_UI)
+    );
+
     let take_offer_tx = build_take_offer_tx(&env.svm, &env.taker, take_offer_accounts);
     let take_offer_tx_result = env.svm.send_transaction(take_offer_tx);
     assert_eq!(take_offer_tx_result.is_ok(), true);
+
+    let taker_offered_ata_after: TokenAccount =
+        get_spl_account(&env.svm, &take_offer_accounts.taker_offered_ata).unwrap();
+    assert_eq!(
+        taker_offered_ata_after.amount,
+        to_base_units(OFFERED_AMOUNT_UI)
+    );
+
+    let taker_wanted_ata_after: TokenAccount =
+        get_spl_account(&env.svm, &take_offer_accounts.taker_wanted_ata).unwrap();
+    assert_eq!(
+        taker_wanted_ata_after.amount,
+        to_base_units(INITIAL_TOKEN_BALANCE_UI - WANTED_AMOUNT_UI)
+    );
+
+    let maker_offered_ata_after: TokenAccount =
+        get_spl_account(&env.svm, &take_offer_accounts.maker_wanted_ata).unwrap();
+    assert_eq!(
+        maker_offered_ata_after.amount,
+        to_base_units(WANTED_AMOUNT_UI)
+    );
+
+    let vault_offered_ata_after: TokenAccount =
+        get_spl_account(&env.svm, &take_offer_accounts.vault_offered_ata).unwrap();
+    assert_eq!(vault_offered_ata_after.amount, 0);
 }

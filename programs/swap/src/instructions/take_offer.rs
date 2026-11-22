@@ -16,9 +16,23 @@ pub struct TakeOffer<'info> {
 
     #[account(
         mut,
+        // The address must be the PDA derived from this offer's id and this maker. Without it the
+        // caller could pass any `Offer` owned by the program, and `maker` (a plain SystemAccount
+        // with no checks of its own) could be someone other than the real maker, so the taker's
+        // payment would go to the wrong wallet.
         seeds = [Offer::OFFER_TAG, offer.id.as_ref(), maker.key().as_ref()],
+        // Reuse the bump stored at `make_offer`. It skips the search for a valid bump on every call
+        // (cheaper) and pins the one canonical address.
         bump = offer.bump,
+        // The accounts the caller passes must be the mints recorded in the offer
+        // (`offer.offered_mint == offered_mint.key()`). Anchor matches by field name, so the names
+        // here and in `Offer` must be equal.
+        // offered_mint: the vault and the taker's receiving ATA are derived from it, so a different
+        // mint would point at the wrong token accounts.
         has_one = offered_mint,
+        // wanted_mint: what the maker asked to be paid in. Without it the taker could pass a mint
+        // they created themselves, mint any amount of it, and "pay" with worthless tokens to take
+        // the offered tokens for free.
         has_one = wanted_mint,
     )]
     offer: Account<'info, Offer>,

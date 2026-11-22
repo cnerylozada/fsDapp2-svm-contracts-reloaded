@@ -17,10 +17,12 @@ All live in `programs/` and share one `Cargo.lock`.
 
 ```
 anchor build                 # must succeed before any test: tests load target/deploy/<program>.so
-cargo test --workspace       # LiteSVM tests (also what `anchor test` runs, see Anchor.toml)
-cargo test -p simple_transfer --test create_deposit -- --nocapture
-cargo check --workspace --tests
+cargo test -p <program> --test <file> -- --show-output
 ```
+
+- `anchor build` compiles every program and writes `target/deploy/<program>.so` and `target/idl/<program>.json`. Run it after any change in `programs/*/src`, because the tests load the `.so`, not the Rust source.
+- `-p <program> --test <file>` runs one test file: `-p` picks the program (the crate name in its `Cargo.toml`), and `--test` is the file name in `programs/<program>/tests/` without `.rs`. Add a test name after it to run a single function.
+- Everything after `--` goes to the test binary. By default Rust hides a test's `println!` output when it passes. `--show-output` prints it after the run for every test, passed or failed. `--nocapture` prints it live while the test runs, so it is better to follow a long test, and it can interleave when tests run in parallel.
 
 A test that behaves strangely after a program change is usually a stale `.so`. Run `anchor build` first.
 
