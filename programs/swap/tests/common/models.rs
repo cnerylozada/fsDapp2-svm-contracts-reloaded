@@ -36,6 +36,7 @@ pub struct Offer {
     pub offered_amount: u64,
     pub wanted_mint: Pubkey,
     pub wanted_amount: u64,
+    pub created_at: i64,
     pub bump: u8,
 }
 

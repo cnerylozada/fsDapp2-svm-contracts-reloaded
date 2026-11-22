@@ -73,6 +73,7 @@ pub fn handler(ctx: Context<MakeOffer>, id: [u8; 16], offered_amount: u64, wante
         offered_amount,
         wanted_mint: ctx.accounts.wanted_mint.key(),
         wanted_amount,
+        created_at: Clock::get()?.unix_timestamp,
         bump: ctx.bumps.offer
     };
 

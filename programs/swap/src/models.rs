@@ -9,6 +9,8 @@ pub struct Offer {
     pub offered_amount: u64,
     pub wanted_mint: Pubkey,
     pub wanted_amount: u64,
+    // Unix timestamp in seconds, taken from the Clock sysvar when the offer is made.
+    pub created_at: i64,
     pub bump: u8,
 }
 
